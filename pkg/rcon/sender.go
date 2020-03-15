@@ -12,10 +12,13 @@ var (
 	udpMarker = []byte{0xFF, 0xFF, 0xFF, 0xFF}
 )
 
+// Sender represents the remote console sender for Quake 3
 type Sender interface {
+	// Send sends command to the server and reads the response up to 64KB
 	Send(ctx context.Context, command string) (output string, err error)
 }
 
+// NewSender creates a new instance of rcon command sender
 func NewSender(dialAddr, password string) Sender {
 	return &sender{
 		dialAddr: dialAddr,
