@@ -2,17 +2,19 @@ package rcon
 
 import (
 	"context"
+	"io/ioutil"
 	"net"
 	"testing"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSend(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	// logrus.SetOutput(ioutil.Discard)
+	logrus.SetOutput(ioutil.Discard)
 
 	addr := runEchoServer(ctx, t)
 
