@@ -2,17 +2,18 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"github.com/pragmader/q3-server-bot/pkg/parsers"
+	"github.com/pragmader/q3-server-bot/pkg/events"
 	"github.com/pragmader/q3-server-bot/pkg/rcon"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	logrus.SetLevel(logrus.DebugLevel)
@@ -20,15 +21,29 @@ func main() {
 	password := os.Getenv("QUAKE3_PASSWORD")
 	serverAddr := os.Getenv("QUAKE3_SERVER")
 
-	command := "players"
 	sender := rcon.NewSender(serverAddr, password)
-	output, err := sender.Send(ctx, command)
-	if err != nil {
-		logrus.Fatal(err)
+
+	em := events.NewManager(sender, 5*time.Second, 5*time.Second)
+
+	events := em.Subscribe()
+
+	go func() {
+		err := em.StartCapturing(ctx)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	}()
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		em.Close()
+		os.Exit(1)
+	}()
+
+	for e := range events {
+		logrus.Infof("%T: %+v", e, e)
 	}
-
-	fmt.Printf("command output:\n%s\n", output)
-
-	players := parsers.ParsePlayers(output)
-	fmt.Printf("parsed output:\n%v\n", players)
+	logrus.Info("subscription closed")
 }
