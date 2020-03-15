@@ -22,7 +22,8 @@ print "
 "print "^3(READY)  ^5:^7   1^5:^7 100.Anarki                 [BOT]  ^3^7
 "print "^3(READY)  ^5:^7   2^5:^7 75.Doom                   [BOT]  ^3^7
 "print "^3(READY)  ^5:^7   3^5:^7 50.Slash                  [BOT]  ^3^7
-"print "         ^5:^7   4^5:^7 another_player             25000       30     20     0  ^3^7
+"print "         ^5:^7   4^5:^7 100.Slash                  [BOT]  ^3^7
+"print "         ^5:^7   5^5:^7 another_player             25000       30     20     0  ^3^7
 "print "
 ^3 5^7 total players
 
@@ -63,10 +64,18 @@ print "
 					},
 					Level: 50,
 				},
-				HumanEntry{
+				BotEntry{
 					PlayerEntry: PlayerEntry{
 						Status: "",
 						ID:     4,
+						Player: "Slash",
+					},
+					Level: 100,
+				},
+				HumanEntry{
+					PlayerEntry: PlayerEntry{
+						Status: "",
+						ID:     5,
 						Player: "another_player",
 					},
 					Rate:    25000,

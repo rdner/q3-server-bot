@@ -11,7 +11,7 @@ var (
 	// matches the row of the players table
 	playerEntryRowRE = regexp.MustCompile(`^\s+"(?:\^\d)*(.*)\s+(?:\^\d)*:(?:\^\d)*\s+(\d+)(?:\^\d)*:(?:\^\d)*\s+(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(?:\^\d)*\n"$`)
 	// matches the bot row of the players table
-	botEntryRowRE = regexp.MustCompile(`^\s+"(?:\^\d)(.*)\s+(?:\^\d)*:(?:\^\d)*\s+(\d+)(?:\^\d)*:(?:\^\d)*\s+(\d+)\.(\S+)\s+\[BOT\]\s+(?:\^\d)*\s*\n"$`)
+	botEntryRowRE = regexp.MustCompile(`^\s+"(?:\^\d)*(.*)\s+(?:\^\d)*:(?:\^\d)*\s+(\d+)(?:\^\d)*:(?:\^\d)*\s+(\d+)\.(\S+)\s+\[BOT\]\s+(?:\^\d)*\s*\n"$`)
 )
 
 // Player represents a player on the server
