@@ -34,7 +34,6 @@ type sender struct {
 }
 
 func (s sender) Send(ctx context.Context, command string) (output string, err error) {
-	logrus.Debugf("sending `%s` to `%s`...", command, s.dialAddr)
 	logrus.Debugf("connecting to `%s`...", s.dialAddr)
 	var d net.Dialer
 	conn, err := d.DialContext(ctx, "udp", s.dialAddr)
@@ -48,20 +47,44 @@ func (s sender) Send(ctx context.Context, command string) (output string, err er
 	}()
 
 	msg := append(udpMarker, []byte(fmt.Sprintf("rcon %s %s\n", s.password, command))...)
-	written, err := conn.Write(msg)
-	if err != nil {
-		return "", err
+
+	response := make(chan bool)
+	var written int
+
+	logrus.Debugf("sending `%s` to `%s`...", command, s.dialAddr)
+	go func() {
+		written, err = conn.Write(msg)
+		response <- true
+	}()
+
+	select {
+	case <-ctx.Done():
+		return "", ctx.Err()
+	case <-response:
+		if err != nil {
+			return "", err
+		}
+		logrus.Debugf(
+			"command `%s` has been sent to `%s`, %d bytes written",
+			command,
+			s.dialAddr,
+			written,
+		)
 	}
-	logrus.Debugf(
-		"command `%s` has been sent to `%s`, %d bytes written",
-		command,
-		s.dialAddr,
-		written,
-	)
 
+	var received int
 	logrus.Debugf("receiving response from `%s`", s.dialAddr)
-	received, err := conn.Read(s.buf)
-	logrus.Debugf("received %d bytes from `%s`", received, s.dialAddr)
+	go func() {
+		received, err = conn.Read(s.buf)
+		output = string(s.buf[0:received])
+		response <- true
+	}()
 
-	return string(s.buf[0:received]), err
+	select {
+	case <-ctx.Done():
+		return "", ctx.Err()
+	case <-response:
+		logrus.Debugf("received %d bytes from `%s`", received, s.dialAddr)
+		return output, err
+	}
 }
