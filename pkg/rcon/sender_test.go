@@ -31,6 +31,13 @@ func TestSend(t *testing.T) {
 			command:   "command",
 			expOutput: "rcon password command\n",
 		},
+		{
+			name:     "returns error if server not found",
+			dialAddr: ":8888",
+			password: "password",
+			command:  "command",
+			expError: "connection refused",
+		},
 	}
 
 	for _, tc := range cases {
@@ -39,7 +46,7 @@ func TestSend(t *testing.T) {
 			output, err := sender.Send(ctx, tc.command)
 			if tc.expError != "" {
 				require.Error(t, err)
-				require.Equal(t, tc.expError, err.Error())
+				require.Contains(t, err.Error(), tc.expError)
 				return
 			}
 			require.NoError(t, err)
@@ -65,7 +72,7 @@ func runEchoServer(ctx context.Context, t *testing.T) (addr string) {
 				message := make([]byte, 1024)
 				rlen, remote, err := pc.ReadFrom(message[:])
 				require.NoError(t, err)
-				_, err = pc.WriteTo(append(message[len(udpMarker):rlen], udpMarker...), remote)
+				_, err = pc.WriteTo(message[len(udpMarker):rlen], remote)
 				require.NoError(t, err)
 			}
 		}

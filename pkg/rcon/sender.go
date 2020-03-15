@@ -1,12 +1,8 @@
 package rcon
 
 import (
-	"bufio"
-	"bytes"
 	"context"
-	"errors"
 	"fmt"
-	"io"
 	"net"
 
 	"github.com/sirupsen/logrus"
@@ -24,16 +20,19 @@ func NewSender(dialAddr, password string) Sender {
 	return &sender{
 		dialAddr: dialAddr,
 		password: password,
+		buf:      make([]byte, 1024*64), // 64KB
 	}
 }
 
 type sender struct {
 	password string
 	dialAddr string
+	buf      []byte
 }
 
 func (s sender) Send(ctx context.Context, command string) (output string, err error) {
 	logrus.Debugf("sending `%s` to `%s`...", command, s.dialAddr)
+	logrus.Debugf("connecting to `%s`...", s.dialAddr)
 	var d net.Dialer
 	conn, err := d.DialContext(ctx, "udp", s.dialAddr)
 	if err != nil {
@@ -58,30 +57,8 @@ func (s sender) Send(ctx context.Context, command string) (output string, err er
 	)
 
 	logrus.Debugf("receiving response from `%s`", s.dialAddr)
-	bts, err := scanResponse(ctx, conn)
-	logrus.Debugf("received %d bytes from `%s`", len(bts), s.dialAddr)
+	received, err := conn.Read(s.buf)
+	logrus.Debugf("received %d bytes from `%s`", received, s.dialAddr)
 
-	return string(bts), err
-}
-
-func scanResponse(ctx context.Context, conn io.Reader) (output string, err error) {
-	scanner := bufio.NewScanner(conn)
-	scanner.Split(splitByMarkerFunc)
-
-	if !scanner.Scan() {
-		return "", errors.New("scanned no response")
-	}
-	return scanner.Text(), nil
-}
-
-func splitByMarkerFunc(data []byte, atEOF bool) (advance int, token []byte, err error) {
-	if atEOF && len(data) == 0 {
-		return 0, nil, nil
-	}
-
-	mi := bytes.Index(data, udpMarker)
-	if mi == -1 {
-		return 0, nil, nil
-	}
-	return mi + len(udpMarker), data[0:mi], nil
+	return string(s.buf[0:received]), err
 }
