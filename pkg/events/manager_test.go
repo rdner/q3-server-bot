@@ -535,9 +535,14 @@ func (s *senderMock) Send(ctx context.Context, command string) (output string, e
 	if i >= len(s.outputs) {
 		// notify we don't have events anymore
 		s.outOfEvents <- true
+
+		select {
+		case <-ctx.Done():
+			return "", ctx.Err()
 		// block for some time just in case
-		<-time.After(100 * time.Millisecond)
-		return "", nil
+		case <-time.After(100 * time.Millisecond):
+			return "", nil
+		}
 	}
 	return s.outputs[i], s.errs[i]
 }
