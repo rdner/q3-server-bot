@@ -283,7 +283,7 @@ func (m *manager) computeState(ctx context.Context) state {
 
 	logrus.Debug("organizing the player list...")
 	for _, p := range players {
-		key := fmt.Sprintf("%d:%s", p.GetID(), p.GetName)
+		key := fmt.Sprintf("%d:%s", p.GetID(), p.GetName())
 		s.playersByKeys[key] = p
 	}
 
