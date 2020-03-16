@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/pragmader/q3-server-bot/pkg/parsers"
@@ -16,6 +17,9 @@ var (
 	// ErrSubscriberNotFound occurs when the subscriber attempts to unsubscribe from
 	// a subscription that does not exist
 	ErrSubscriberNotFound = errors.New("subscriber was not found")
+
+	// ErrAlreadyRunning occurs when `StartCapturing` is called twice without closing
+	ErrAlreadyRunning = errors.New("event capturing is in progress")
 )
 
 const (
@@ -98,6 +102,7 @@ type manager struct {
 	mutex             *sync.RWMutex
 	state             state
 	closed            chan bool
+	runningCnt        int32
 }
 
 func (m *manager) Close() error {
@@ -125,7 +130,15 @@ func (m *manager) Close() error {
 	return nil
 }
 
-func (m manager) StartCapturing(ctx context.Context) error {
+func (m *manager) StartCapturing(ctx context.Context) error {
+	if !atomic.CompareAndSwapInt32(&m.runningCnt, 0, 1) {
+		return ErrAlreadyRunning
+	}
+
+	defer func() {
+		atomic.SwapInt32(&m.runningCnt, 0)
+	}()
+
 	logrus := logrus.
 		WithField("package", "state").
 		WithField("module", "EventManager").
