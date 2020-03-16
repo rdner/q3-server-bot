@@ -18,6 +18,7 @@ import (
 )
 
 var (
+	// ErrBotRunning occurs when someone attempted to start the bot when it's already running
 	ErrBotRunning = errors.New("this bot is already running")
 )
 
@@ -29,6 +30,7 @@ type TelegramBot interface {
 	Close() error
 }
 
+// ParseMode that Telegram supports in their messages
 type ParseMode string
 
 var (
