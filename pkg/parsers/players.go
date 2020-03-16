@@ -9,9 +9,11 @@ import (
 
 var (
 	// matches the row of the players table
-	playerEntryRowRE = regexp.MustCompile(`^\s+"(?:\^\d)*(.*)\s+(?:\^\d)*:(?:\^\d)*\s+(\d+)(?:\^\d)*:(?:\^\d)*\s+(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(?:\^\d)*\n"$`)
+	// e.g. ` "NOTREADY ^5:^7   0^5:^7 pragmader                  25000       30     20     1  ^3^7\n"`
+	playerEntryRowRE = regexp.MustCompile(`^\s+"(.*)\s+:\s+(\d+):\s+(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\n"$`)
 	// matches the bot row of the players table
-	botEntryRowRE = regexp.MustCompile(`^\s+"(?:\^\d)*(.*)\s+(?:\^\d)*:(?:\^\d)*\s+(\d+)(?:\^\d)*:(?:\^\d)*\s+(\d+)\.(\S+)\s+\[BOT\]\s+(?:\^\d)*\s*\n"$`)
+	// e.g.  "         ^5:^7   4^5:^7 100.Slash                  [BOT]  ^3^7\n"
+	botEntryRowRE = regexp.MustCompile(`^\s+"(.*)\s+:\s+(\d+):\s+(\d+)\.(\S+)\s+\[BOT\]\s+\s*\n"$`)
 )
 
 // Player represents a player on the server
@@ -65,6 +67,8 @@ type BotEntry struct {
 // ParsePlayers tries to find information about human players and bots parsing the output
 // of `rcon <password> players`.
 func ParsePlayers(str string) (players []Player) {
+	str = RemoveQ3Colors(str)
+
 	lines := strings.Split(str, "print")
 
 	for _, line := range lines {
