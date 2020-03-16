@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	// ErrSubscriberNotFound occurs when the subscriber attempts to unsubscribe from
+	// ErrSubscriptionNotFound occurs when the subscriber attempts to unsubscribe from
 	// a subscription that does not exist
-	ErrSubscriberNotFound = errors.New("subscriber was not found")
+	ErrSubscriptionNotFound = errors.New("subscriber was not found")
 
 	// ErrAlreadyRunning occurs when `StartCapturing` is called twice without closing
 	ErrAlreadyRunning = errors.New("event capturing is in progress")
@@ -329,7 +329,7 @@ func (m *manager) Unsubscribe(c <-chan AnyEvent) error {
 
 	if len(newSubs) == len(m.subscriptions) {
 		logrus.Debug("subscription was not found")
-		return ErrSubscriberNotFound
+		return ErrSubscriptionNotFound
 	}
 
 	m.mutex.Lock()
