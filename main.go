@@ -80,6 +80,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	logrus.Info("initializing...")
 	sender := rcon.NewSender(q3ServerAddr, q3Password)
 	em := events.NewManager(sender, 5*time.Second, 5*time.Second)
 	bot := telegram.NewServerEventsBot(
@@ -93,14 +94,7 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
-	go func() {
-		<-c
-		em.Close()
-		bot.Close()
-		cancel()
-		os.Exit(1)
-	}()
-
+	logrus.Info("starting event capturing and sending messages...")
 	go func() {
 		err := bot.Start(ctx)
 		if err != nil {
@@ -108,8 +102,19 @@ func main() {
 		}
 	}()
 
-	err := em.StartCapturing(ctx)
-	if err != nil {
-		logrus.Fatal(err)
-	}
+	go func() {
+		err := em.StartCapturing(ctx)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	}()
+
+	<-c
+	logrus.Info("shutting down events...")
+	em.Close()
+	logrus.Info("shutting down the bot...")
+	bot.Close()
+	cancel()
+	logrus.Info("all stopped")
+	os.Exit(1)
 }

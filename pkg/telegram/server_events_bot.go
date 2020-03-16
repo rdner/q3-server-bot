@@ -75,6 +75,7 @@ func NewServerEventsBot(mngr events.Manager, token, chatID, serverAddress string
 		chatID:        chatID,
 		events:        mngr.Subscribe(),
 		throttling:    throttling,
+		closed:        make(chan bool),
 	}
 }
 
@@ -263,5 +264,6 @@ func (b serverEventsBot) Close() error {
 
 	logrus.Debug("closing...")
 	b.closed <- true
+	close(b.closed)
 	return b.mngr.Unsubscribe(b.events)
 }
