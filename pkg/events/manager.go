@@ -107,7 +107,7 @@ type manager struct {
 
 func (m *manager) Close() error {
 	logrus := logrus.
-		WithField("package", "state").
+		WithField("package", "events").
 		WithField("module", "EventManager").
 		WithField("function", "Close")
 
@@ -140,7 +140,7 @@ func (m *manager) StartCapturing(ctx context.Context) error {
 	}()
 
 	logrus := logrus.
-		WithField("package", "state").
+		WithField("package", "events").
 		WithField("module", "EventManager").
 		WithField("function", "StartCapturing")
 
@@ -171,7 +171,7 @@ func (m *manager) StartCapturing(ctx context.Context) error {
 
 func (m *manager) applyState(ctx context.Context, new state) {
 	logrus := logrus.
-		WithField("package", "state").
+		WithField("package", "events").
 		WithField("module", "EventManager").
 		WithField("function", "applyState")
 
@@ -230,10 +230,10 @@ func (m *manager) applyState(ctx context.Context, new state) {
 
 func (m *manager) emitEvent(ctx context.Context, e AnyEvent) error {
 	logrus := logrus.
-		WithField("package", "state").
+		WithField("package", "events").
 		WithField("module", "EventManager").
 		WithField("function", "emitEvent").
-		WithField("event", fmt.Sprintf("%T: %v", e, e))
+		WithField("event.type", fmt.Sprintf("%T", e))
 
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
@@ -253,7 +253,7 @@ func (m *manager) emitEvent(ctx context.Context, e AnyEvent) error {
 
 func (m *manager) computeState(ctx context.Context) state {
 	logrus := logrus.
-		WithField("package", "state").
+		WithField("package", "events").
 		WithField("module", "EventManager").
 		WithField("function", "computeState")
 
@@ -292,7 +292,7 @@ func (m *manager) computeState(ctx context.Context) state {
 
 func (m *manager) Subscribe() <-chan AnyEvent {
 	logrus := logrus.
-		WithField("package", "state").
+		WithField("package", "events").
 		WithField("module", "EventManager").
 		WithField("function", "Subscribe")
 
@@ -309,7 +309,7 @@ func (m *manager) Subscribe() <-chan AnyEvent {
 
 func (m *manager) Unsubscribe(c <-chan AnyEvent) error {
 	logrus := logrus.
-		WithField("package", "state").
+		WithField("package", "events").
 		WithField("module", "EventManager").
 		WithField("function", "Unsubscribe")
 
