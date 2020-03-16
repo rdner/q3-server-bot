@@ -22,6 +22,14 @@ var (
 	ErrBotRunning = errors.New("this bot is already running")
 )
 
+const (
+	msgServerStarted = "Server started. Join the game!\n\n"
+	msgServerStopped = "Server stopped.\n\n"
+	fmtJoinedPlayers = "%s joined the game\n"
+	fmtLeftPlayers   = "%s left the game\n"
+	fmtConnectMsg    = "Use this console command to connect:\n```\n\\connect %s\n```"
+)
+
 // TelegramBot represents a bot built for Telegram
 type TelegramBot interface {
 	// Starts the bot process
@@ -59,24 +67,26 @@ type telegramMessage struct {
 // (in the format @channelusername).
 // `throttling` — duration of time in which all incoming events would be grouped
 // into one message.
-func NewServerEventsBot(mngr events.Manager, token, chatID string, throttling time.Duration) TelegramBot {
+func NewServerEventsBot(mngr events.Manager, token, chatID, serverAddress string, throttling time.Duration) TelegramBot {
 	return serverEventsBot{
-		mngr:       mngr,
-		token:      token,
-		chatID:     chatID,
-		events:     mngr.Subscribe(),
-		throttling: throttling,
+		mngr:          mngr,
+		token:         token,
+		serverAddress: serverAddress,
+		chatID:        chatID,
+		events:        mngr.Subscribe(),
+		throttling:    throttling,
 	}
 }
 
 type serverEventsBot struct {
-	mngr       events.Manager
-	token      string
-	chatID     string
-	events     <-chan events.AnyEvent
-	throttling time.Duration
-	runningCnt int32
-	closed     chan bool
+	mngr          events.Manager
+	token         string
+	chatID        string
+	serverAddress string
+	events        <-chan events.AnyEvent
+	throttling    time.Duration
+	runningCnt    int32
+	closed        chan bool
 }
 
 func (b serverEventsBot) Start(ctx context.Context) error {
@@ -215,26 +225,32 @@ func (b serverEventsBot) buildMessage(eventList []events.AnyEvent) (msg telegram
 	for _, e := range eventList {
 		switch te := e.(type) {
 		case *events.ServerStartedEvent:
-			serverMsg = "Server started. Join the game!"
+			serverMsg = msgServerStarted
 		case *events.ServerStoppedEvent:
-			serverMsg = "Server stopped."
+			serverMsg = msgServerStopped
 		case *events.PlayerJoinedEvent:
-			joinedPlayers = append(joinedPlayers, "`"+te.Player.GetName()+"`") // bold formatting
+			joinedPlayers = append(joinedPlayers, "`"+te.Player.GetName()+"`") // formatting
 		case *events.PlayerLeftEvent:
 			leftPlayers = append(leftPlayers, "`"+te.Player.GetName()+"`")
 		}
 	}
 
 	if serverMsg != "" {
-		msg.Text = serverMsg + "\n"
+		msg.Text = serverMsg
 	}
 
 	if len(joinedPlayers) != 0 {
-		msg.Text += fmt.Sprintf("\n%s joined the game", strings.Join(joinedPlayers, ", "))
+		msg.Text += fmt.Sprintf(fmtJoinedPlayers, strings.Join(joinedPlayers, ", "))
 	}
 	if len(leftPlayers) != 0 {
-		msg.Text += fmt.Sprintf("\n%s left the game", strings.Join(leftPlayers, ", "))
+		msg.Text += fmt.Sprintf(fmtLeftPlayers, strings.Join(leftPlayers, ", "))
 	}
+
+	if !strings.HasPrefix(msg.Text, msgServerStopped) {
+		msg.Text += fmt.Sprintf(fmtConnectMsg, b.serverAddress)
+	}
+
+	msg.Text = strings.TrimSpace(msg.Text)
 
 	return msg
 }

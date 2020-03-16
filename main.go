@@ -26,7 +26,7 @@ func main() {
 
 	sender := rcon.NewSender(serverAddr, password)
 	em := events.NewManager(sender, 5*time.Second, 5*time.Second)
-	bot := telegram.NewServerEventsBot(em, token, chatID, 3*time.Second)
+	bot := telegram.NewServerEventsBot(em, token, chatID, serverAddr, 3*time.Second)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
