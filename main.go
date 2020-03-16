@@ -43,6 +43,9 @@ func main() {
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
+	logrus.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp: true,
+	})
 
 	if telegramToken == "" {
 		telegramToken = os.Getenv("TELEGRAM_TOKEN")
