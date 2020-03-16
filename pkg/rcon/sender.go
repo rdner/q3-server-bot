@@ -1,6 +1,7 @@
 package rcon
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net"
@@ -78,7 +79,7 @@ func (s sender) Send(ctx context.Context, command string) (output string, err er
 	logrus.Debugf("receiving response...")
 	go func() {
 		received, err = conn.Read(s.buf)
-		output = string(s.buf[0:received])
+		output = string(bytes.TrimPrefix(s.buf, udpMarker)[0:received])
 		response <- true
 	}()
 
