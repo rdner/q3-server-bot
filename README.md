@@ -35,6 +35,12 @@ Usage of ./bin/q3serverbot:
         Bot token that you get when you create a Telegram bot. You can use 'TELEGRAM_TOKEN' environment variable instead.
 ```
 
+## Deployment
+
+* `make` builds the binary in `./bin/q3serverbot`
+* `make systemd` prompts some questions interactively and generates a systemd unit file (the service process will run from the current user and from `./bin/q3serverbot` path).
+* `make clean` removes the binary and the systemd unit file.
+
 MIT License.
 
 Denis Rechkunov (mail@pragmader.me)

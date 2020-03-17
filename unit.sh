@@ -11,7 +11,7 @@ echo
 
 declare -A vars
 vars=(
-		[PWD]=$(pwd)
+		[PWD]="$(pwd)/bin/q3serverbot"
 		[Q3_SERVER_ADDR]=$q3_server_addr
 		[Q3_PASSWORD]=$q3_password
 		[TELEGRAM_CHAT_ID]=$telegram_chat_id
