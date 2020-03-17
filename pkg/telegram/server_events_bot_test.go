@@ -362,6 +362,30 @@ func TestServerEventsBot(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("returns `ErrBotRunning` when try to run twice", func(t *testing.T) {
+		em := eventMngrMock{
+			testEvents:  nil,
+			events:      make(chan events.AnyEvent),
+			outOfEvents: make(chan bool),
+		}
+		b := NewServerEventsBot(
+			em,
+			"token",
+			"chatID",
+			"localhost",
+			"localhost:27960",
+			50*time.Millisecond,
+		)
+
+		go b.Start(ctx)
+		go em.StartCapturing(ctx)
+
+		<-em.outOfEvents
+		err := b.Start(ctx)
+		require.Error(t, err)
+		require.Equal(t, ErrBotRunning, err)
+	})
 }
 
 type eventMngrMock struct {
