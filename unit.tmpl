@@ -1,0 +1,16 @@
+[Unit]
+Description=Quake3 Server Bot
+After=network.target
+
+[Service]
+Environment="Q3_PASSWORD=%%Q3_PASSWORD%%"
+Environment="Q3_SERVER_ADDR=%%Q3_SERVER_ADDR%%"
+Environment="TELEGRAM_CHAT_ID=%%TELEGRAM_CHAT_ID%%"
+Environment="TELEGRAM_TOKEN=%%TELEGRAM_TOKEN%%"
+ExecStart=%%PWD%%/q3serverbot
+Type=simple
+Restart=always
+User=%%USER%%
+
+[Install]
+WantedBy=multi-user.target

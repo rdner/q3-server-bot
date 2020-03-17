@@ -11,4 +11,11 @@ test:
 	go test ./... -coverprofile=coverage.txt -cover -v -timeout 10s
 
 clean:
-	rm -rf ./bin
+	rm ./bin/q3serverbot
+	rm ./q3serverbot.service
+
+./q3serverbot.service:
+	./unit.sh ./q3serverbot.service
+
+.PHONY: systemd
+systemd: ./q3serverbot.service
