@@ -17,7 +17,7 @@ Here is an example of the messages from the bot:
 
 ## Compatibility
 
-This bot and its parsers are tested with Challenge ProMode Arena 1.52. There is absolutely no warranty it would work with other mods/versions.
+This bot and its parsers are tested with [Challenge ProMode Arena 1.52](https://www.playmorepromode.com/). There is absolutely no warranty it would work with other mods/versions.
 
 ## Usage
 
