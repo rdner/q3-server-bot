@@ -75,7 +75,7 @@ func NewServerEventsBot(
 	token, chatID, apiBaseURL, q3ServerAddress string,
 	throttling time.Duration,
 ) TelegramBot {
-	return serverEventsBot{
+	return &serverEventsBot{
 		mngr:            mngr,
 		apiBaseURL:      apiBaseURL,
 		token:           token,
@@ -101,7 +101,7 @@ type serverEventsBot struct {
 	mutex           *sync.Mutex
 }
 
-func (b serverEventsBot) Start(ctx context.Context) error {
+func (b *serverEventsBot) Start(ctx context.Context) error {
 	if !atomic.CompareAndSwapInt32(&b.runningCnt, 0, 1) {
 		return ErrBotRunning
 	}
@@ -292,6 +292,5 @@ func (b serverEventsBot) Close() error {
 
 	logrus.Debug("closing...")
 	b.closed <- true
-	close(b.closed)
 	return b.mngr.Unsubscribe(b.events)
 }

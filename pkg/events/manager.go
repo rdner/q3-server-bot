@@ -114,7 +114,7 @@ func (m *manager) Close() error {
 	logrus.Debug("closing...")
 
 	m.closed <- true // signal the stop of the capturing
-	close(m.closed)
+
 	logrus.Debug("closing signal sent")
 
 	logrus.Debug("closing subscription channels...")
