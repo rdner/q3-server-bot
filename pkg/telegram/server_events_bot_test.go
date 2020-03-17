@@ -350,8 +350,6 @@ func TestServerEventsBot(t *testing.T) {
 				<-em.outOfEvents
 				em.Close()
 				b.Close()
-				close(em.outOfEvents)
-				close(em.events)
 			}()
 
 			b.Start(ctx)
@@ -365,7 +363,12 @@ func TestServerEventsBot(t *testing.T) {
 
 	t.Run("returns `ErrBotRunning` when try to run twice", func(t *testing.T) {
 		em := eventMngrMock{
-			testEvents:  nil,
+			testEvents: []testEvent{
+				{
+					event:      &events.ServerStartedEvent{},
+					delayAfter: 10 * time.Millisecond,
+				},
+			},
 			events:      make(chan events.AnyEvent),
 			outOfEvents: make(chan bool),
 		}
@@ -375,13 +378,18 @@ func TestServerEventsBot(t *testing.T) {
 			"chatID",
 			"localhost",
 			"localhost:27960",
-			50*time.Millisecond,
+			1*time.Millisecond,
 		)
+
+		defer func() {
+			b.Close()
+		}()
 
 		go b.Start(ctx)
 		go em.StartCapturing(ctx)
 
 		<-em.outOfEvents
+
 		err := b.Start(ctx)
 		require.Error(t, err)
 		require.Equal(t, ErrBotRunning, err)
@@ -405,10 +413,14 @@ func (m eventMngrMock) StartCapturing(ctx context.Context) error {
 	}
 
 	m.outOfEvents <- true
+	close(m.outOfEvents)
 	return nil
 }
 
-func (m eventMngrMock) Subscribe() <-chan events.AnyEvent        { return m.events }
-func (m eventMngrMock) Unsubscribe(<-chan events.AnyEvent) error { return nil }
+func (m eventMngrMock) Subscribe() <-chan events.AnyEvent { return m.events }
+func (m eventMngrMock) Unsubscribe(<-chan events.AnyEvent) error {
+	close(m.events)
+	return nil
+}
 
 func (m eventMngrMock) Close() error { return nil }
