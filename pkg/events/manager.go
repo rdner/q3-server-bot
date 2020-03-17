@@ -167,8 +167,6 @@ func (m *manager) StartCapturing(ctx context.Context) error {
 			m.applyState(ctx, s)
 		}
 	}
-
-	return nil
 }
 
 func (m *manager) applyState(ctx context.Context, new state) {
@@ -230,7 +228,7 @@ func (m *manager) applyState(ctx context.Context, new state) {
 	m.state = new
 }
 
-func (m *manager) emitEvent(ctx context.Context, e AnyEvent) error {
+func (m *manager) emitEvent(ctx context.Context, e AnyEvent) {
 	logrus := logrus.
 		WithField("package", "events").
 		WithField("module", "EventManager").
@@ -245,12 +243,11 @@ func (m *manager) emitEvent(ctx context.Context, e AnyEvent) error {
 	for _, s := range m.subscriptions {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			return
 		default:
 			s <- e
 		}
 	}
-	return nil
 }
 
 func (m *manager) computeState(ctx context.Context) state {

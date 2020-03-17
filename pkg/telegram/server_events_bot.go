@@ -145,8 +145,6 @@ func (b *serverEventsBot) Start(ctx context.Context) error {
 			b.flushBatch(ctx, &currentBatch)
 		}
 	}
-
-	return nil
 }
 
 func (b serverEventsBot) flushBatch(ctx context.Context, batchPtr *[]events.AnyEvent) {
@@ -195,10 +193,17 @@ func (b serverEventsBot) sendMessage(ctx context.Context, eventList []events.Any
 	go func() {
 		enc := json.NewEncoder(w)
 		err = enc.Encode(msg)
+
 		if err != nil {
-			w.CloseWithError(err)
+			subErr := w.CloseWithError(err)
+			if subErr != nil {
+				logrus.Error(subErr)
+			}
 		} else {
-			w.Close()
+			err := w.Close()
+			if err != nil {
+				logrus.Error(err)
+			}
 		}
 	}()
 

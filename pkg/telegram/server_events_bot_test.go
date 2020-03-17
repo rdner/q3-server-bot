@@ -345,14 +345,20 @@ func TestServerEventsBot(t *testing.T) {
 				tc.throttling,
 			)
 
-			go em.StartCapturing(ctx)
+			go func() {
+				err := em.StartCapturing(ctx)
+				require.NoError(t, err)
+			}()
 			go func() {
 				<-em.outOfEvents
-				em.Close()
-				b.Close()
+				err := em.Close()
+				require.NoError(t, err)
+				err = b.Close()
+				require.NoError(t, err)
 			}()
 
-			b.Start(ctx)
+			err := b.Start(ctx)
+			require.NoError(t, err)
 
 			require.Len(t, messages, len(tc.expMessages))
 			for _, m := range tc.expMessages {
@@ -385,8 +391,14 @@ func TestServerEventsBot(t *testing.T) {
 			b.Close()
 		}()
 
-		go b.Start(ctx)
-		go em.StartCapturing(ctx)
+		go func() {
+			err := b.Start(ctx)
+			require.NoError(t, err)
+		}()
+		go func() {
+			err := em.StartCapturing(ctx)
+			require.NoError(t, err)
+		}()
 
 		<-em.outOfEvents
 

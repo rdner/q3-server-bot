@@ -297,7 +297,10 @@ print "
 			close(c)
 		}()
 
-		go m.StartCapturing(ctx)
+		go func() {
+			err := m.StartCapturing(ctx)
+			require.NoError(t, err)
+		}()
 
 		<-c
 		err := m.StartCapturing(ctx)
@@ -428,8 +431,10 @@ print "
 		events1 := m.Subscribe()
 		events2 := m.Subscribe()
 		events3 := m.Subscribe()
-		m.Unsubscribe(events2)
-		m.Unsubscribe(events3)
+		err := m.Unsubscribe(events2)
+		require.NoError(t, err)
+		err = m.Unsubscribe(events3)
+		require.NoError(t, err)
 
 		var wg sync.WaitGroup
 
