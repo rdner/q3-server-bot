@@ -90,6 +90,7 @@ func main() {
 		em,
 		telegramToken,
 		telegramChatID,
+		"https://api.telegram.org",
 		q3ServerAddr,
 		3*time.Second,
 	)

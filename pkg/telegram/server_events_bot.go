@@ -65,29 +65,40 @@ type telegramMessage struct {
 // `token` — token of the bot on Telegram
 // `chatID` — Unique identifier for the target chat or username of the target channel
 // (in the format @channelusername).
+// `apiBaseURL` — base URL of the Telegram bot API, this parameter was introduced to make
+// the bot implementation testable.
+// `q3ServerAddress` — full address <host>:<port> of the Quake 3 server. Used in messages.
 // `throttling` — duration of time in which all incoming events would be grouped
 // into one message.
-func NewServerEventsBot(mngr events.Manager, token, chatID, serverAddress string, throttling time.Duration) TelegramBot {
+func NewServerEventsBot(
+	mngr events.Manager,
+	token, chatID, apiBaseURL, q3ServerAddress string,
+	throttling time.Duration,
+) TelegramBot {
 	return serverEventsBot{
-		mngr:          mngr,
-		token:         token,
-		serverAddress: serverAddress,
-		chatID:        chatID,
-		events:        mngr.Subscribe(),
-		throttling:    throttling,
-		closed:        make(chan bool),
+		mngr:            mngr,
+		apiBaseURL:      apiBaseURL,
+		token:           token,
+		q3ServerAddress: q3ServerAddress,
+		chatID:          chatID,
+		events:          mngr.Subscribe(),
+		throttling:      throttling,
+		closed:          make(chan bool),
+		mutex:           &sync.Mutex{},
 	}
 }
 
 type serverEventsBot struct {
-	mngr          events.Manager
-	token         string
-	chatID        string
-	serverAddress string
-	events        <-chan events.AnyEvent
-	throttling    time.Duration
-	runningCnt    int32
-	closed        chan bool
+	mngr            events.Manager
+	token           string
+	chatID          string
+	q3ServerAddress string
+	apiBaseURL      string
+	events          <-chan events.AnyEvent
+	throttling      time.Duration
+	runningCnt      int32
+	closed          chan bool
+	mutex           *sync.Mutex
 }
 
 func (b serverEventsBot) Start(ctx context.Context) error {
@@ -105,7 +116,6 @@ func (b serverEventsBot) Start(ctx context.Context) error {
 		WithField("function", "Start")
 
 	var (
-		mutex        sync.Mutex
 		currentBatch []events.AnyEvent
 	)
 
@@ -114,40 +124,58 @@ func (b serverEventsBot) Start(ctx context.Context) error {
 		for e := range b.events {
 			logrus := logrus.WithField("event.type", fmt.Sprintf("%T", e))
 			logrus.Debug("received event")
-			mutex.Lock()
+			b.mutex.Lock()
 			currentBatch = append(currentBatch, e)
-			mutex.Unlock()
+			b.mutex.Unlock()
 		}
 	}()
 
 	logrus.Debug("starting message sending loop...")
 	for {
-		logrus.Debugf("sending messages again in %s...", b.throttling)
+		logrus.Debugf("try sending messages again in %s...", b.throttling)
 		select {
 		case <-ctx.Done():
 			logrus.Debug("got context cancellation, stopped")
 			return ctx.Err()
 		case <-b.closed:
+			b.flushBatch(ctx, &currentBatch)
 			logrus.Debug("got closing signal, stopped")
 			return nil
 		case <-time.After(b.throttling):
-			mutex.Lock()
-			logrus.
-				WithField("event.count", len(currentBatch)).
-				Debug("starting iteration...")
-			if len(currentBatch) != 0 {
-				sendErr := b.sendMessage(ctx, currentBatch)
-				if sendErr != nil {
-					logrus.Warnf("failed to send message: %s", sendErr.Error())
-				} else {
-					currentBatch = nil
-				}
-			}
-			mutex.Unlock()
+			b.flushBatch(ctx, &currentBatch)
 		}
 	}
 
 	return nil
+}
+
+func (b serverEventsBot) flushBatch(ctx context.Context, batchPtr *[]events.AnyEvent) {
+	if batchPtr == nil {
+		return
+	}
+
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+
+	batch := *batchPtr
+	logrus := logrus.
+		WithField("package", "telegram").
+		WithField("module", "ServerEventsBot").
+		WithField("function", "flushBatch").
+		WithField("event.count", len(batch))
+
+	if len(batch) == 0 {
+		logrus.Debug("no events to send")
+		return
+	}
+
+	logrus.Debug("sending event batch...")
+	sendErr := b.sendMessage(ctx, batch)
+	if sendErr != nil {
+		logrus.Warnf("failed to send message: %s", sendErr.Error())
+	} else {
+		*batchPtr = nil
+	}
 }
 
 func (b serverEventsBot) sendMessage(ctx context.Context, eventList []events.AnyEvent) (err error) {
@@ -174,7 +202,7 @@ func (b serverEventsBot) sendMessage(ctx context.Context, eventList []events.Any
 		}
 	}()
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", b.token)
+	url := fmt.Sprintf("%s/bot%s/sendMessage", b.apiBaseURL, b.token)
 	logrus.Debug("making request to Telegram API")
 	resp, err := http.Post(url, "application/json", r)
 	if err != nil {
@@ -248,7 +276,7 @@ func (b serverEventsBot) buildMessage(eventList []events.AnyEvent) (msg telegram
 	}
 
 	if !strings.HasPrefix(msg.Text, msgServerStopped) {
-		msg.Text += fmt.Sprintf(fmtConnectMsg, b.serverAddress)
+		msg.Text += fmt.Sprintf(fmtConnectMsg, b.q3ServerAddress)
 	}
 
 	msg.Text = strings.TrimSpace(msg.Text)
