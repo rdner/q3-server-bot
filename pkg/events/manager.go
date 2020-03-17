@@ -113,7 +113,9 @@ func (m *manager) Close() error {
 
 	logrus.Debug("closing...")
 
-	m.closed <- true // signal the stop of the capturing
+	if atomic.CompareAndSwapInt32(&m.runningCnt, 1, 1) {
+		m.closed <- true
+	}
 
 	logrus.Debug("closing signal sent")
 

@@ -291,6 +291,9 @@ func (b serverEventsBot) Close() error {
 		WithField("function", "sendMessage")
 
 	logrus.Debug("closing...")
-	b.closed <- true
+	if atomic.CompareAndSwapInt32(&b.runningCnt, 1, 1) {
+		b.closed <- true
+	}
+
 	return b.mngr.Unsubscribe(b.events)
 }
