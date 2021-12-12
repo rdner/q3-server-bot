@@ -43,4 +43,4 @@ Usage of ./bin/q3serverbot:
 
 MIT License.
 
-Denis Rechkunov (mail@pragmader.me)
+Denis Rechkunov (denis@rdner.de)
