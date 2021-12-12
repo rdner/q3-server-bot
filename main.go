@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/pragmader/q3-server-bot/pkg/events"
-	"github.com/pragmader/q3-server-bot/pkg/rcon"
-	"github.com/pragmader/q3-server-bot/pkg/telegram"
+	"github.com/rdner/q3-server-bot/pkg/events"
+	"github.com/rdner/q3-server-bot/pkg/rcon"
+	"github.com/rdner/q3-server-bot/pkg/telegram"
 	"github.com/sirupsen/logrus"
 )
 

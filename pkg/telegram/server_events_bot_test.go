@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pragmader/q3-server-bot/pkg/events"
-	"github.com/pragmader/q3-server-bot/pkg/parsers"
+	"github.com/rdner/q3-server-bot/pkg/events"
+	"github.com/rdner/q3-server-bot/pkg/parsers"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )

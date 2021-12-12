@@ -13,7 +13,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/pragmader/q3-server-bot/pkg/events"
+	"github.com/rdner/q3-server-bot/pkg/events"
 	"github.com/sirupsen/logrus"
 )
 

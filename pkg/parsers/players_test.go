@@ -18,7 +18,7 @@ func TestParsePlayers(t *testing.T) {
 print "
 ^3Status^5   : ^3ID^5 : ^3Player                      Rate  MaxPkts  Snaps PLost
 "print "^5----------------------------------------------------------------------^7
-"print "NOTREADY ^5:^7   0^5:^7 pragmader                  25000       30     20     1  ^3^7
+"print "NOTREADY ^5:^7   0^5:^7 rdner                  25000       30     20     1  ^3^7
 "print "^3(READY)  ^5:^7   1^5:^7 100.Anarki                 [BOT]  ^3^7
 "print "^3(READY)  ^5:^7   2^5:^7 75.Doom                   [BOT]  ^3^7
 "print "^3(READY)  ^5:^7   3^5:^7 50.Slash                  [BOT]  ^3^7
@@ -33,7 +33,7 @@ print "
 					PlayerEntry: PlayerEntry{
 						Status: "NOTREADY",
 						ID:     0,
-						Player: "pragmader",
+						Player: "rdner",
 					},
 					Rate:    25000,
 					MaxPkts: 30,

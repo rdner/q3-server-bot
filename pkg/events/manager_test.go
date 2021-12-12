@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pragmader/q3-server-bot/pkg/parsers"
+	"github.com/rdner/q3-server-bot/pkg/parsers"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
@@ -77,7 +77,7 @@ print "
 print "
 ^3Status^5   : ^3ID^5 : ^3Player                      Rate  MaxPkts  Snaps PLost
 "print "^5----------------------------------------------------------------------^7
-"print "NOTREADY ^5:^7   0^5:^7 pragmader                  25000       30     20     1  ^3^7
+"print "NOTREADY ^5:^7   0^5:^7 rdner                  25000       30     20     1  ^3^7
 "print "
 ^3 1^7 total players
 
@@ -91,7 +91,7 @@ print "
 						PlayerEntry: parsers.PlayerEntry{
 							Status: "NOTREADY",
 							ID:     0,
-							Player: "pragmader",
+							Player: "rdner",
 						},
 						Rate:    25000,
 						MaxPkts: 30,
@@ -108,7 +108,7 @@ print "
 print "
 ^3Status^5   : ^3ID^5 : ^3Player                      Rate  MaxPkts  Snaps PLost
 "print "^5----------------------------------------------------------------------^7
-"print "NOTREADY ^5:^7   0^5:^7 pragmader                  25000       30     20     1  ^3^7
+"print "NOTREADY ^5:^7   0^5:^7 rdner                  25000       30     20     1  ^3^7
 "print "
 ^3 1^7 total players
 
@@ -130,7 +130,7 @@ print "
 						PlayerEntry: parsers.PlayerEntry{
 							Status: "NOTREADY",
 							ID:     0,
-							Player: "pragmader",
+							Player: "rdner",
 						},
 						Rate:    25000,
 						MaxPkts: 30,
@@ -143,7 +143,7 @@ print "
 						PlayerEntry: parsers.PlayerEntry{
 							Status: "NOTREADY",
 							ID:     0,
-							Player: "pragmader",
+							Player: "rdner",
 						},
 						Rate:    25000,
 						MaxPkts: 30,

@@ -1,4 +1,4 @@
-module github.com/pragmader/q3-server-bot
+module github.com/rdner/q3-server-bot
 
 go 1.13
 

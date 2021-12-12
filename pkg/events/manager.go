@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/pragmader/q3-server-bot/pkg/parsers"
-	"github.com/pragmader/q3-server-bot/pkg/rcon"
+	"github.com/rdner/q3-server-bot/pkg/parsers"
+	"github.com/rdner/q3-server-bot/pkg/rcon"
 	"github.com/sirupsen/logrus"
 )
 

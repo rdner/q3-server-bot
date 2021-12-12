@@ -9,7 +9,7 @@ import (
 
 var (
 	// matches the row of the players table
-	// e.g. ` "NOTREADY ^5:^7   0^5:^7 pragmader                  25000       30     20     1  ^3^7\n"`
+	// e.g. ` "NOTREADY ^5:^7   0^5:^7 rdner                  25000       30     20     1  ^3^7\n"`
 	playerEntryRowRE = regexp.MustCompile(`^\s+"(.*)\s+:\s+(\d+):\s+(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+\n"$`)
 	// matches the bot row of the players table
 	// e.g.  "         ^5:^7   4^5:^7 100.Slash                  [BOT]  ^3^7\n"
